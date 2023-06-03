@@ -12,35 +12,29 @@ export const useFetchQuestion = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    setGetData(prev => ({...prev, isLoading : true}));
+
+    (async () => {
       setGetData(prevState => ({
         ...prevState,
         isLoading: true
       }));
 
       try {
-        const question = await data;
-        if (question.length > 0) {
-          setGetData(prevState => ({
-            ...prevState,
-            isLoading: false,
-            apiData: question
-          }));
+        const questions = await data;
+        if (questions.length > 0) {
+          setGetData(prev => ({...prev, isLoading : false}));
+          setGetData(prev => ({...prev, apiData : questions}));
 
-          dispatch(Actions.startExamAction());
+          dispatch(Actions.startExamAction({ question : questions}))
         } else {
           throw new Error("No Questions Available");
         }
       } catch (error) {
-        setGetData(prevState => ({
-          ...prevState,
-          isLoading: false,
-          serverError: error
-        }));
+        setGetData(prev => ({...prev, isLoading : false}));
+        setGetData(prev => ({...prev, serverError : error}));
       }
-    };
-
-    fetchData();
+    })();
   }, [dispatch]);
 
   return [getData, setGetData];
